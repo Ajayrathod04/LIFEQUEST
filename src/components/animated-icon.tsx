@@ -40,7 +40,11 @@ export function AnimatedSplashOverlay() {
       entering={splashKeyframe.duration(DURATION).withCallback((finished) => {
         'worklet';
         if (finished) {
-          scheduleOnRN(setVisible, false);
+          try {
+            scheduleOnRN(setVisible, false);
+          } catch (e) {
+            // fallback
+          }
         }
       })}
       style={styles.splashOverlay}>
@@ -49,9 +53,13 @@ export function AnimatedSplashOverlay() {
   ) : (
     <View
       onLayout={() => {
-        SplashScreen.hideAsync().finally(() => {
-          setAnimate(true);
-        });
+        SplashScreen.hideAsync()
+          .catch((err) => {
+            console.warn("[SplashOverlay] hideAsync notice:", err);
+          })
+          .finally(() => {
+            setAnimate(true);
+          });
       }}
       style={styles.splashOverlay}>
       {image}
